@@ -1,7 +1,7 @@
-import { type Expense, categories, categoryIcons, formatCurrency, calculateTotalExpenses, calculateCategoryTotals, type Category } from "@/lib/expenses";
+import { type Transaction, categories, categoryIcons, formatCurrency, calculateTotalExpenses, calculateCategoryTotals, type Category } from "@/lib/expenses";
 
 interface SummarySectionProps {
-  filtered: Expense[];
+  filtered: Transaction[];
 }
 
 const SummarySection = ({ filtered }: SummarySectionProps) => {
@@ -23,6 +23,7 @@ const SummarySection = ({ filtered }: SummarySectionProps) => {
           ) : (
             categories.map((cat) => {
               const amount = categoryTotals[cat] || 0;
+              if (amount === 0) return null;
               const icon = categoryIcons[cat as Category] || "💸";
               return (
                 <li key={cat} className="py-1.5 border-b border-border/50 last:border-b-0 text-sm">

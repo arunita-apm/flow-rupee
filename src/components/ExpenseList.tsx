@@ -1,7 +1,7 @@
-import { type Expense, categoryIcons, formatCurrency, type Category } from "@/lib/expenses";
+import { type Transaction, categoryIcons, formatCurrency, type Category } from "@/lib/expenses";
 
 interface ExpenseListProps {
-  expenses: Expense[];
+  expenses: Transaction[];
   onDelete: (id: string) => void;
 }
 
@@ -24,8 +24,26 @@ const ExpenseList = ({ expenses, onDelete }: ExpenseListProps) => (
             >
               <div className="flex flex-col gap-1">
                 <p className="font-bold m-0">{icon} {item.category} — {formatCurrency(item.amount)}</p>
-                <p className="text-sm text-muted m-0">📅 Date: {item.date}</p>
-                {item.notes && <p className="text-[13px] text-foreground/70 m-0">Notes: {item.notes}</p>}
+                <p className="text-sm text-muted m-0">📅 {item.date}</p>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {item.platform && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">{item.platform}</span>
+                  )}
+                  {item.payment_method && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">{item.payment_method}</span>
+                  )}
+                  {item.transaction_type && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground border border-border">{item.transaction_type}</span>
+                  )}
+                  {item.need_or_want && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                      item.need_or_want === "Need" ? "bg-success/20 text-success-foreground border-success/30" :
+                      item.need_or_want === "Want" ? "bg-accent/40 text-accent-foreground border-accent/50" :
+                      "bg-destructive/20 text-destructive-foreground border-destructive/30"
+                    }`}>{item.need_or_want}</span>
+                  )}
+                </div>
+                {item.notes && <p className="text-[13px] text-foreground/70 m-0 mt-1">Notes: {item.notes}</p>}
               </div>
               <div className="flex items-start">
                 <button
