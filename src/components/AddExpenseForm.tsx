@@ -48,7 +48,8 @@ function PillToggle<T extends string>({
       ))}
     </div>
   </div>
-);
+  );
+}
 
 const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
   const [amount, setAmount] = useState("");
