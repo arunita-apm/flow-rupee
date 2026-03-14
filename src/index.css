@@ -84,3 +84,39 @@
     font-family: 'Poppins', sans-serif;
   }
 }
+
+@layer components {
+  .section-card {
+    @apply bg-card p-4 rounded-xl border border-border;
+    box-shadow: var(--shadow-card);
+    transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  }
+  .section-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: #d7e3ff;
+  }
+
+  .form-input {
+    @apply px-2.5 py-2.5 border border-border rounded-md bg-card text-foreground text-sm;
+    font: inherit;
+  }
+  .form-input:focus {
+    @apply outline-2 outline-primary-strong border-primary-strong;
+  }
+
+  .btn-primary-pill {
+    @apply inline-block border-none text-primary-foreground px-4 py-2.5 rounded-full cursor-pointer;
+    background: var(--gradient-primary-btn);
+    box-shadow: var(--shadow-btn);
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  }
+  .btn-primary-pill:hover {
+    background: var(--gradient-primary-btn-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-btn-hover);
+  }
+  .btn-primary-pill:active {
+    transform: translateY(0);
+  }
+}
