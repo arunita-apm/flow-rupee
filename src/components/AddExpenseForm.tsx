@@ -117,9 +117,9 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-          <PillToggle label="Payment Method" options={paymentMethods} value={paymentMethod} onChange={setPaymentMethod} />
-          <PillToggle label="Transaction Type" options={transactionTypes} value={transactionType} onChange={setTransactionType} />
-          <PillToggle label="Need or Want" options={needOrWantOptions} value={needOrWant} onChange={setNeedOrWant} />
+          <PillToggle label="Payment Method" options={paymentMethods} value={paymentMethod} onChange={(v) => setPaymentMethod(v as PaymentMethod)} />
+          <PillToggle label="Transaction Type" options={transactionTypes} value={transactionType} onChange={(v) => setTransactionType(v as TransactionType)} />
+          <PillToggle label="Need or Want" options={needOrWantOptions} value={needOrWant} onChange={(v) => setNeedOrWant(v as NeedOrWant)} />
         </div>
 
         <div className="mt-3">
