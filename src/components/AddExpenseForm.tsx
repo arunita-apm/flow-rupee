@@ -17,7 +17,7 @@ interface AddExpenseFormProps {
   }) => Promise<{ error: string | null }>;
 }
 
-const PillToggle = <T extends string>({
+function PillToggle<T extends string>({
   label,
   options,
   value,
@@ -27,7 +27,8 @@ const PillToggle = <T extends string>({
   options: readonly T[];
   value: T | "";
   onChange: (v: T) => void;
-}) => (
+}) {
+  return (
   <div className="flex flex-col gap-1.5 text-sm">
     <span>{label}</span>
     <div className="flex flex-wrap gap-1.5">
