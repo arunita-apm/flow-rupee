@@ -6,71 +6,96 @@ import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
 import SummarySection from "@/components/SummarySection";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
-  type Expense,
-  type Category,
+  type Transaction,
   type Filters,
-  loadExpenses,
-  saveExpenses,
-  loadBudget,
-  saveBudget,
-  sortExpensesByDate,
-  filterExpenses,
+  filterTransactions,
   calculateTotalExpenses,
 } from "@/lib/expenses";
 
 const Index = () => {
-  const [expenses, setExpenses] = useState<Expense[]>(() => sortExpensesByDate(loadExpenses()));
-  const [budget, setBudget] = useState(() => loadBudget());
+  const { user, profile } = useAuth();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filters, setFilters] = useState<Filters>({ category: "", startDate: "", endDate: "" });
+  const [loading, setLoading] = useState(true);
 
-  const filtered = filterExpenses(expenses, filters);
-  const totalAll = calculateTotalExpenses(expenses);
+  const budget = profile?.monthly_salary ?? 0;
+
+  const fetchTransactions = useCallback(async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false });
+    setTransactions(data || []);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const filtered = filterTransactions(transactions, filters);
+  const totalAll = calculateTotalExpenses(transactions);
 
   const handleNavigate = useCallback((id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const handleSaveBudget = useCallback((value: number) => {
-    setBudget(value);
-    saveBudget(value);
-  }, []);
-
-  const handleAddExpense = useCallback((data: { amount: string; category: Category; date: string; notes: string }) => {
+  const handleAddExpense = useCallback(async (data: {
+    amount: string; category: string; platform: string;
+    payment_method: string; transaction_type: string;
+    need_or_want: string; date: string; notes: string;
+  }) => {
     const parsedAmount = parseFloat(data.amount);
     if (Number.isNaN(parsedAmount) || parsedAmount <= 0) return { error: "Please enter a valid amount greater than 0." };
     if (!data.date) return { error: "Please pick a date." };
-    if (!data.category) return { error: "Please select a category." };
+    if (!user) return { error: "Not logged in." };
 
-    const newExpense: Expense = {
-      id: `exp_${Date.now()}`,
+    const { error } = await supabase.from("transactions").insert({
+      user_id: user.id,
       amount: parsedAmount,
       category: data.category,
+      platform: data.platform,
+      payment_method: data.payment_method,
+      transaction_type: data.transaction_type,
+      need_or_want: data.need_or_want,
       date: data.date,
       notes: data.notes?.trim() || "",
-    };
-    const updated = sortExpensesByDate([...expenses, newExpense]);
-    setExpenses(updated);
-    saveExpenses(updated);
-    return { error: null };
-  }, [expenses]);
+    });
 
-  const handleDelete = useCallback((id: string) => {
-    const updated = expenses.filter((e) => e.id !== id);
-    setExpenses(updated);
-    saveExpenses(updated);
-  }, [expenses]);
+    if (error) return { error: error.message };
+    await fetchTransactions();
+    return { error: null };
+  }, [user, fetchTransactions]);
+
+  const handleDelete = useCallback(async (id: string) => {
+    await supabase.from("transactions").delete().eq("id", id);
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   return (
     <div className="min-h-screen">
       <AppHeader />
       <main className="max-w-[960px] mx-auto px-4 pb-10">
+        {profile?.name && (
+          <div className="section-card mt-4 text-center">
+            <p className="text-lg font-semibold m-0">Hey {profile.name}, let's track your money 👋</p>
+          </div>
+        )}
         <PillNav onNavigate={handleNavigate} />
         <div className="flex flex-col gap-4 mt-4">
-          <SpendingPower budget={budget} totalAllExpenses={totalAll} onSaveBudget={handleSaveBudget} />
+          <SpendingPower budget={budget} totalAllExpenses={totalAll} />
           <AddExpenseForm onAdd={handleAddExpense} />
           <FiltersSection filters={filters} onChange={setFilters} />
-          <ExpenseList expenses={filtered} onDelete={handleDelete} />
+          {loading ? (
+            <div className="text-center text-muted py-8">Loading expenses...</div>
+          ) : (
+            <ExpenseList expenses={filtered} onDelete={handleDelete} />
+          )}
           <SummarySection filtered={filtered} />
         </div>
       </main>
