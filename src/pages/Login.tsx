@@ -8,36 +8,57 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const getFormattedPhone = () => {
+    const digits = phone.replace(/\D/g, "");
+    return digits.startsWith("91") ? `+${digits}` : `+91${digits}`;
+  };
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const formatted = phone.startsWith("+") ? phone : `+91${phone}`;
-    if (formatted.length < 10) {
+    const formatted = getFormattedPhone();
+    if (formatted.length < 12) {
       setError("Please enter a valid phone number.");
       return;
     }
     setLoading(true);
-    const { error: err } = await supabase.auth.signInWithOtp({ phone: formatted });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("send-otp", {
+        body: { phone: formatted },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+      setStep("otp");
+    } catch (err: any) {
+      setError(err?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
     }
-    setStep("otp");
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const formatted = phone.startsWith("+") ? phone : `+91${phone}`;
+    const formatted = getFormattedPhone();
     setLoading(true);
-    const { error: err } = await supabase.auth.verifyOtp({
-      phone: formatted,
-      token: otp,
-      type: "sms",
-    });
-    setLoading(false);
-    if (err) setError(err.message);
+    try {
+      const { data, error: fnErr } = await supabase.functions.invoke("verify-otp", {
+        body: { phone: formatted, code: otp },
+      });
+      if (fnErr) throw fnErr;
+      if (data?.error) throw new Error(data.error);
+
+      // Use the token_hash to establish a session
+      const { error: authErr } = await supabase.auth.verifyOtp({
+        token_hash: data.token_hash,
+        type: "magiclink",
+      });
+      if (authErr) throw authErr;
+    } catch (err: any) {
+      setError(err?.message || "Failed to verify OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
