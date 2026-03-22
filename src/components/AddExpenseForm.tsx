@@ -135,7 +135,7 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
         </div>
       </form>
       {error && <p className="text-destructive text-sm mt-1.5" role="alert">{error}</p>}
-    </section>
+    </div>
   );
 };
 
