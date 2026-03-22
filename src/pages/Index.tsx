@@ -1,7 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import AppHeader from "@/components/AppHeader";
-import PillNav from "@/components/PillNav";
-import SpendingPower from "@/components/SpendingPower";
+import BottomNav from "@/components/BottomNav";
+import Dashboard from "@/components/Dashboard";
+import SilentSpends from "@/components/SilentSpends";
+import InsightsPlaceholder from "@/components/InsightsPlaceholder";
 import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
@@ -12,14 +14,21 @@ import {
   type Transaction,
   type Filters,
   filterTransactions,
-  calculateTotalExpenses,
 } from "@/lib/expenses";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 const Index = () => {
   const { user, profile } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filters, setFilters] = useState<Filters>({ category: "", startDate: "", endDate: "" });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("home");
+  const [addDrawerOpen, setAddDrawerOpen] = useState(false);
 
   const budget = profile?.monthly_salary ?? 0;
 
@@ -39,10 +48,13 @@ const Index = () => {
   }, [fetchTransactions]);
 
   const filtered = filterTransactions(transactions, filters);
-  const totalAll = calculateTotalExpenses(transactions);
 
-  const handleNavigate = useCallback((id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const handleTabChange = useCallback((tab: string) => {
+    if (tab === "add") {
+      setAddDrawerOpen(true);
+    } else {
+      setActiveTab(tab);
+    }
   }, []);
 
   const handleAddExpense = useCallback(async (data: {
@@ -69,6 +81,7 @@ const Index = () => {
 
     if (error) return { error: error.message };
     await fetchTransactions();
+    setAddDrawerOpen(false);
     return { error: null };
   }, [user, fetchTransactions]);
 
@@ -77,28 +90,58 @@ const Index = () => {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  const renderContent = () => {
+    if (loading) {
+      return <div className="text-center text-muted py-8">Loading...</div>;
+    }
+
+    switch (activeTab) {
+      case "home":
+        return <Dashboard transactions={transactions} budget={budget} />;
+      case "silent":
+        return <SilentSpends transactions={transactions} />;
+      case "insights":
+        return <InsightsPlaceholder />;
+      case "expenses":
+        return (
+          <div className="flex flex-col gap-4">
+            <FiltersSection filters={filters} onChange={setFilters} />
+            <ExpenseList expenses={filtered} onDelete={handleDelete} />
+            <SummarySection filtered={filtered} />
+          </div>
+        );
+      default:
+        return <Dashboard transactions={transactions} budget={budget} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen">
-      <AppHeader />
-      <main className="max-w-[960px] mx-auto px-4 pb-10">
-        {profile?.name && (
+    <div className="min-h-screen pb-20">
+      {activeTab === "home" && <AppHeader />}
+
+      <main className="max-w-[960px] mx-auto px-4 pb-4">
+        {activeTab === "home" && profile?.name && (
           <div className="section-card mt-4 text-center">
             <p className="text-lg font-semibold m-0">Hey {profile.name}, let's track your money 👋</p>
           </div>
         )}
-        <PillNav onNavigate={handleNavigate} />
-        <div className="flex flex-col gap-4 mt-4">
-          <SpendingPower budget={budget} totalAllExpenses={totalAll} />
-          <AddExpenseForm onAdd={handleAddExpense} />
-          <FiltersSection filters={filters} onChange={setFilters} />
-          {loading ? (
-            <div className="text-center text-muted py-8">Loading expenses...</div>
-          ) : (
-            <ExpenseList expenses={filtered} onDelete={handleDelete} />
-          )}
-          <SummarySection filtered={filtered} />
+        <div className="mt-4">
+          {renderContent()}
         </div>
       </main>
+
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      <Drawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>➕ Add Expense</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            <AddExpenseForm onAdd={handleAddExpense} />
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };

@@ -88,8 +88,7 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
   };
 
   return (
-    <section id="add-expense-section" className="section-card" aria-label="Add expense">
-      <h2 className="text-lg font-semibold mb-3">➕ Add Expense</h2>
+    <div aria-label="Add expense">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5 text-sm">
@@ -136,7 +135,7 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
         </div>
       </form>
       {error && <p className="text-destructive text-sm mt-1.5" role="alert">{error}</p>}
-    </section>
+    </div>
   );
 };
 
