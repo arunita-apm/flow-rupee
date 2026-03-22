@@ -133,11 +133,11 @@ const Index = () => {
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       <Drawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen}>
-        <DrawerContent className="max-h-[85vh] overflow-y-auto">
-          <DrawerHeader>
+        <DrawerContent className="max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+          <DrawerHeader className="shrink-0">
             <DrawerTitle>➕ Add Expense</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-6">
             <AddExpenseForm onAdd={handleAddExpense} />
           </div>
         </DrawerContent>
