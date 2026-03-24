@@ -3,7 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import Dashboard from "@/components/Dashboard";
 import SilentSpends from "@/components/SilentSpends";
-import InsightsPlaceholder from "@/components/InsightsPlaceholder";
+import InsightsSection from "@/components/InsightsSection";
 import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
@@ -101,7 +101,7 @@ const Index = () => {
       case "silent":
         return <SilentSpends transactions={transactions} />;
       case "insights":
-        return <InsightsPlaceholder />;
+        return <InsightsSection transactions={transactions} />;
       case "expenses":
         return (
           <div className="flex flex-col gap-4">
