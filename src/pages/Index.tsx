@@ -3,7 +3,7 @@ import AppHeader from "@/components/AppHeader";
 import BottomNav from "@/components/BottomNav";
 import Dashboard from "@/components/Dashboard";
 import SilentSpends from "@/components/SilentSpends";
-import InsightsPlaceholder from "@/components/InsightsPlaceholder";
+import InsightsSection from "@/components/InsightsSection";
 import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
