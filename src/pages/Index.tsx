@@ -101,7 +101,7 @@ const Index = () => {
       case "silent":
         return <SilentSpends transactions={transactions} />;
       case "insights":
-        return <InsightsPlaceholder />;
+        return <InsightsSection transactions={transactions} />;
       case "expenses":
         return (
           <div className="flex flex-col gap-4">
