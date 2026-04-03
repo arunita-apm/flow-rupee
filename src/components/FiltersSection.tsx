@@ -1,4 +1,5 @@
 import { categories, type Filters } from "@/lib/expenses";
+import { RotateCcw } from "lucide-react";
 
 interface FiltersSectionProps {
   filters: Filters;
@@ -7,7 +8,7 @@ interface FiltersSectionProps {
 
 const FiltersSection = ({ filters, onChange }: FiltersSectionProps) => (
   <section id="filters-section" className="section-card" aria-label="Expense filters">
-    <h2 className="text-lg font-semibold mb-3">🔍 Filters</h2>
+    <h2 className="text-lg font-semibold mb-3">Filters</h2>
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       <label className="flex flex-col gap-1.5 text-sm">
         Category
@@ -29,9 +30,9 @@ const FiltersSection = ({ filters, onChange }: FiltersSectionProps) => (
       <button
         type="button"
         onClick={() => onChange({ category: "", startDate: "", endDate: "" })}
-        className="px-3 py-2 text-sm rounded-full bg-secondary text-secondary-foreground border border-[#dbe4ff] cursor-pointer transition-all duration-150 hover:bg-[#d7dcff] hover:-translate-y-px"
+        className="px-3 py-2 text-sm rounded-full bg-secondary text-secondary-foreground border border-border cursor-pointer transition-all duration-150 hover:bg-accent hover:-translate-y-px flex items-center gap-1.5"
       >
-        ♻️ Reset Filters
+        <RotateCcw size={14} /> Reset Filters
       </button>
     </div>
   </section>

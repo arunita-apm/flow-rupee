@@ -1,32 +1,52 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-const AppHeader = () => {
+interface AppHeaderProps {
+  showSubtitle?: boolean;
+}
+
+const AppHeader = ({ showSubtitle = false }: AppHeaderProps) => {
   const { profile, signOut } = useAuth();
   const initial = profile?.name?.charAt(0)?.toUpperCase() || "?";
 
   return (
-    <header className="text-center py-6 px-4 border-b border-border/5 relative" style={{
+    <header className="py-4 px-4 border-b border-border/5 relative" style={{
       background: 'var(--gradient-header)',
       boxShadow: 'var(--shadow-header)',
     }}>
-      <h1 className="text-2xl md:text-3xl font-bold m-0 mb-2 text-primary-foreground">Rupee Flow</h1>
-      <p className="text-sm opacity-90 m-0 text-primary-foreground/80">Know every rupee</p>
-      {profile?.name && (
-        <div className="absolute right-4 top-4 flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-semibold">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
-          <button
-            onClick={signOut}
-            className="text-xs px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground border border-border cursor-pointer hover:bg-accent transition-colors"
+      <div className="max-w-[960px] mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          {/* Rupee logo */}
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base shrink-0"
+            style={{ background: "linear-gradient(135deg, hsl(260 60% 55%) 0%, hsl(270 70% 65%) 100%)" }}
           >
-            Logout
-          </button>
+            ₹
+          </div>
+          <div>
+            <h1 className="text-xl font-bold m-0 text-primary-foreground leading-tight">Rupee Flow</h1>
+            {showSubtitle && (
+              <p className="text-xs opacity-80 m-0 text-primary-foreground/70 leading-tight">Know every rupee</p>
+            )}
+          </div>
         </div>
-      )}
+
+        {profile?.name && (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-semibold">
+                {initial}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              onClick={signOut}
+              className="text-xs px-2.5 py-1 rounded-full bg-secondary text-secondary-foreground border border-border cursor-pointer hover:bg-accent transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
 };

@@ -1,14 +1,16 @@
+import { Home, PlusCircle, BellOff, Lightbulb, List } from "lucide-react";
+
 interface BottomNavProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
 const tabs = [
-  { id: "home", emoji: "🏠", label: "Home" },
-  { id: "add", emoji: "➕", label: "Add" },
-  { id: "silent", emoji: "👻", label: "Silent" },
-  { id: "insights", emoji: "🧠", label: "Insights" },
-  { id: "expenses", emoji: "🧾", label: "Expenses" },
+  { id: "home", icon: Home, label: "Home" },
+  { id: "add", icon: PlusCircle, label: "Add" },
+  { id: "silent", icon: BellOff, label: "Silent" },
+  { id: "insights", icon: Lightbulb, label: "Insights" },
+  { id: "expenses", icon: List, label: "Expenses" },
 ];
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => (
@@ -21,21 +23,20 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => (
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const isAdd = tab.id === "add";
+        const Icon = tab.icon;
 
         return (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all duration-150 cursor-pointer border-none bg-transparent ${
-              isAdd
-                ? "relative -mt-4"
-                : ""
+              isAdd ? "relative -mt-4" : ""
             }`}
           >
             <span
-              className={`text-xl leading-none flex items-center justify-center transition-all duration-150 ${
+              className={`flex items-center justify-center transition-all duration-150 ${
                 isAdd
-                  ? "w-12 h-12 rounded-full text-2xl shadow-lg"
+                  ? "w-12 h-12 rounded-full shadow-lg"
                   : "w-8 h-8 rounded-lg"
               }`}
               style={
@@ -53,11 +54,14 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => (
                   : {}
               }
             >
-              {tab.emoji}
+              <Icon
+                size={isAdd ? 24 : 20}
+                className={!isAdd && !isActive ? "text-muted-foreground" : ""}
+              />
             </span>
             <span
               className={`text-[10px] font-medium transition-colors ${
-                isActive || isAdd ? "text-[hsl(260,60%,55%)]" : "text-muted"
+                isActive || isAdd ? "text-primary" : "text-muted-foreground"
               }`}
             >
               {tab.label}
