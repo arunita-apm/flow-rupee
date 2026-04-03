@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import {
   categories, platforms, paymentMethods, transactionTypes, needOrWantOptions,
   type Category, type Platform, type PaymentMethod, type TransactionType, type NeedOrWant,
@@ -129,8 +130,9 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
         </div>
 
         <div className="flex justify-end mt-3">
-          <button type="submit" disabled={loading} className="btn-primary-pill">
-            {loading ? "Adding..." : "➕ Add Expense"}
+          <button type="submit" disabled={loading} className="btn-primary-pill flex items-center gap-1.5">
+            <Plus size={16} />
+            {loading ? "Adding..." : "Add Expense"}
           </button>
         </div>
       </form>

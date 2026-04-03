@@ -10,7 +10,7 @@ const SpendingPower = ({ budget, totalAllExpenses }: SpendingPowerProps) => {
 
   return (
     <section id="spending-section" className="section-card" aria-label="Spending power">
-      <h2 className="text-lg font-semibold mb-3">💪 Spending Power</h2>
+      <h2 className="text-lg font-semibold mb-3">Spending Power</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-xl p-3 border border-border" style={{ background: 'var(--gradient-budget-card)' }}>
           <p className="text-sm text-muted m-0 mb-1">Monthly Salary</p>
@@ -19,7 +19,7 @@ const SpendingPower = ({ budget, totalAllExpenses }: SpendingPowerProps) => {
 
         <div className="rounded-xl p-3 border border-border" style={{ background: 'var(--gradient-remaining-card)' }}>
           <p className="text-sm text-muted m-0 mb-1">Remaining after expenses</p>
-          <p className={`text-2xl font-bold m-0 ${remaining >= 0 ? 'text-[#0f766e]' : 'text-[#b42318]'}`}>
+          <p className={`text-2xl font-bold m-0 ${remaining >= 0 ? 'text-[hsl(172,80%,24%)]' : 'text-destructive'}`}>
             {formatCurrency(remaining)}
           </p>
           <p className="text-sm text-muted mt-1 m-0">

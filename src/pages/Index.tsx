@@ -117,12 +117,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      {activeTab === "home" && <AppHeader />}
+      <AppHeader showSubtitle={activeTab === "home"} />
 
       <main className="max-w-[960px] mx-auto px-4 pb-4">
         {activeTab === "home" && profile?.name && (
           <div className="section-card mt-4 text-center">
-            <p className="text-lg font-semibold m-0">Hey {profile.name}, let's track your money 👋</p>
+            <p className="text-lg font-semibold m-0">Hey {profile.name}, let's track your money</p>
           </div>
         )}
         <div className="mt-4">
@@ -135,7 +135,7 @@ const Index = () => {
       <Drawer open={addDrawerOpen} onOpenChange={setAddDrawerOpen}>
         <DrawerContent className="max-h-[90vh] sm:max-h-[85vh] flex flex-col">
           <DrawerHeader className="shrink-0">
-            <DrawerTitle>➕ Add Expense</DrawerTitle>
+            <DrawerTitle>Add Expense</DrawerTitle>
           </DrawerHeader>
           <div className="flex-1 overflow-y-auto px-4 pb-6">
             <AddExpenseForm onAdd={handleAddExpense} />

@@ -48,7 +48,6 @@ const Login = () => {
       if (fnErr) throw fnErr;
       if (data?.error) throw new Error(data.error);
 
-      // Use the token_hash to establish a session
       const { error: authErr } = await supabase.auth.verifyOtp({
         token_hash: data.token_hash,
         type: "magiclink",
@@ -65,7 +64,15 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--gradient-bg)' }}>
       <div className="section-card w-full max-w-sm">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary-foreground">Rupee Flow</h1>
+          <div className="flex items-center justify-center gap-2.5 mb-2">
+            <div
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base"
+              style={{ background: "linear-gradient(135deg, hsl(260 60% 55%) 0%, hsl(270 70% 65%) 100%)" }}
+            >
+              ₹
+            </div>
+            <h1 className="text-2xl font-bold text-primary-foreground m-0">Rupee Flow</h1>
+          </div>
           <p className="text-sm text-muted">Know every rupee</p>
         </div>
 
@@ -87,7 +94,7 @@ const Login = () => {
               </div>
             </label>
             <button type="submit" disabled={loading} className="btn-primary-pill text-sm">
-              {loading ? "Sending OTP..." : "Send OTP 📲"}
+              {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
         ) : (
@@ -108,7 +115,7 @@ const Login = () => {
               />
             </label>
             <button type="submit" disabled={loading} className="btn-primary-pill text-sm">
-              {loading ? "Verifying..." : "Verify OTP ✅"}
+              {loading ? "Verifying..." : "Verify OTP"}
             </button>
             <button
               type="button"

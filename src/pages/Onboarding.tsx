@@ -47,7 +47,7 @@ const Onboarding = () => {
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--gradient-bg)' }}>
       <div className="section-card w-full max-w-sm">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-primary-foreground">Welcome to Rupee Flow 🎉</h1>
+          <h1 className="text-2xl font-bold text-primary-foreground">Welcome to Rupee Flow</h1>
           <p className="text-sm text-muted mt-1">Tell us a bit about yourself</p>
         </div>
 
@@ -77,7 +77,7 @@ const Onboarding = () => {
             />
           </label>
           <button type="submit" disabled={loading} className="btn-primary-pill text-sm">
-            {loading ? "Saving..." : "Let's Go! 🚀"}
+            {loading ? "Saving..." : "Let's Go"}
           </button>
         </form>
 

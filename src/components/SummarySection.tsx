@@ -1,4 +1,4 @@
-import { type Transaction, categories, categoryIcons, formatCurrency, calculateTotalExpenses, calculateCategoryTotals, type Category } from "@/lib/expenses";
+import { type Transaction, categories, formatCurrency, calculateTotalExpenses, calculateCategoryTotals } from "@/lib/expenses";
 
 interface SummarySectionProps {
   filtered: Transaction[];
@@ -10,7 +10,7 @@ const SummarySection = ({ filtered }: SummarySectionProps) => {
 
   return (
     <section id="summary-section" className="section-card" aria-label="Expense summary">
-      <h2 className="text-lg font-semibold mb-3">📊 Summary</h2>
+      <h2 className="text-lg font-semibold mb-3">Summary</h2>
       <div className="rounded-xl p-3 border border-border mb-3" style={{ background: 'var(--gradient-card)' }}>
         <p className="text-sm text-muted m-0 mb-1">Total Expenses (filtered)</p>
         <p className="text-2xl font-bold text-primary-foreground m-0">{formatCurrency(total)}</p>
@@ -24,10 +24,9 @@ const SummarySection = ({ filtered }: SummarySectionProps) => {
             categories.map((cat) => {
               const amount = categoryTotals[cat] || 0;
               if (amount === 0) return null;
-              const icon = categoryIcons[cat as Category] || "💸";
               return (
                 <li key={cat} className="py-1.5 border-b border-border/50 last:border-b-0 text-sm">
-                  {icon} {cat}: {formatCurrency(amount)}
+                  {cat}: {formatCurrency(amount)}
                 </li>
               );
             })
