@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import SettingsSheet from "@/components/SettingsSheet";
 
 interface AppHeaderProps {
   showSubtitle?: boolean;
@@ -16,7 +17,6 @@ const AppHeader = ({ showSubtitle = false }: AppHeaderProps) => {
     }}>
       <div className="max-w-[960px] mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          {/* Rupee logo */}
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-base shrink-0"
             style={{ background: "linear-gradient(135deg, hsl(260 60% 55%) 0%, hsl(270 70% 65%) 100%)" }}
@@ -33,6 +33,7 @@ const AppHeader = ({ showSubtitle = false }: AppHeaderProps) => {
 
         {profile?.name && (
           <div className="flex items-center gap-2">
+            <SettingsSheet />
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-secondary text-secondary-foreground text-sm font-semibold">
                 {initial}
