@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { type Transaction, formatCurrency } from "@/lib/expenses";
-import { Moon, Calendar, CreditCard, BellOff, TrendingDown, Target, ChevronUp, ChevronDown } from "lucide-react";
+import { Moon, Calendar, CreditCard, BellOff, TrendingDown, Target, ChevronUp, ChevronDown, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface InsightCard {
@@ -39,14 +39,14 @@ function buildInsights(transactions: Transaction[]): InsightCard[] {
     {
       icon: Calendar,
       headline: "Weekends cost you 3x more",
-      explanation: "Weekend avg ₹3,800 vs ₹1,200 weekdays. Mostly food and transport.",
+      explanation: "Weekend avg 3,800 vs 1,200 weekdays. Mostly food and transport.",
       tip: "Plan weekend activities in advance with a fixed budget. Free outings can be just as fun!",
       bg: bgColors[1],
     },
     {
       icon: CreditCard,
       headline: "Card makes you spend more",
-      explanation: "Avg UPI spend ₹340 vs credit card ₹1,180. Same categories, different habit.",
+      explanation: "Avg UPI spend 340 vs credit card 1,180. Same categories, different habit.",
       tip: "Switch to UPI for daily expenses. The friction of seeing money leave instantly helps control spending.",
       bg: bgColors[2],
     },
@@ -76,38 +76,66 @@ function buildInsights(transactions: Transaction[]): InsightCard[] {
   ];
 }
 
-function InsightCardItem({ card }: { card: InsightCard }) {
-  const [expanded, setExpanded] = useState(false);
+function InsightCardItem({ card, onExpand }: { card: InsightCard; onExpand: () => void }) {
   const Icon = card.icon;
 
   return (
     <div
-      className={`min-w-[260px] max-w-[300px] rounded-2xl border p-5 flex flex-col gap-2 snap-center shrink-0 ${card.bg}`}
+      className={`rounded-2xl border p-5 flex flex-col gap-2 ${card.bg} cursor-pointer`}
+      onClick={onExpand}
     >
-      <Icon size={28} className="text-foreground/70" />
-      <h3 className="text-base font-bold m-0 text-foreground">{card.headline}</h3>
+      <div className="flex items-center gap-2">
+        <Icon size={22} className="text-foreground/70 shrink-0" />
+        <h3 className="text-base font-bold m-0 text-foreground">{card.headline}</h3>
+      </div>
       <p className="text-sm text-muted-foreground m-0 leading-snug">{card.explanation}</p>
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="text-xs font-semibold mt-1 text-left text-primary-foreground/70 hover:text-primary-foreground transition-colors bg-transparent border-none cursor-pointer p-0 flex items-center gap-1"
+        onClick={(e) => { e.stopPropagation(); onExpand(); }}
+        className="text-xs font-semibold mt-1 text-left text-primary hover:text-primary/80 transition-colors bg-transparent border-none cursor-pointer p-0 flex items-center gap-1"
       >
-        {expanded ? (
-          <>Hide tip <ChevronUp size={12} /></>
-        ) : (
-          <>Finance tip <ChevronDown size={12} /></>
-        )}
+        Finance tip <ChevronDown size={12} />
       </button>
-      {expanded && (
-        <p className="text-xs text-foreground/80 m-0 leading-relaxed bg-white/50 rounded-lg p-3">
-          {card.tip}
-        </p>
-      )}
+    </div>
+  );
+}
+
+function ExpandedInsightCard({ card, onClose }: { card: InsightCard; onClose: () => void }) {
+  const Icon = card.icon;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className={`rounded-2xl border p-6 flex flex-col gap-3 w-full max-w-md max-h-[90vh] overflow-y-auto ${card.bg}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon size={28} className="text-foreground/70" />
+            <h3 className="text-lg font-bold m-0 text-foreground">{card.headline}</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-full hover:bg-black/10 bg-transparent border-none cursor-pointer">
+            <X size={20} />
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground m-0 leading-relaxed">{card.explanation}</p>
+        <div className="bg-white/60 rounded-xl p-4 mt-2">
+          <p className="text-xs font-semibold text-primary m-0 mb-1">Finance Tip</p>
+          <p className="text-sm text-foreground/80 m-0 leading-relaxed">{card.tip}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
 const InsightsSection = ({ transactions }: { transactions: Transaction[] }) => {
   const insights = buildInsights(transactions);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  // Show 3 cards at a time, paginated
+  const pageSize = 3;
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(insights.length / pageSize);
+  const visibleCards = insights.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
     <div className="flex flex-col gap-4">
@@ -118,11 +146,37 @@ const InsightsSection = ({ transactions }: { transactions: Transaction[] }) => {
         </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
-        {insights.map((card, i) => (
-          <InsightCardItem key={i} card={card} />
+      <div className="flex flex-col gap-3">
+        {visibleCards.map((card, i) => (
+          <InsightCardItem
+            key={page * pageSize + i}
+            card={card}
+            onExpand={() => setExpandedIndex(page * pageSize + i)}
+          />
         ))}
       </div>
+
+      {/* Dot indicators */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-2">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              className={`w-2.5 h-2.5 rounded-full border-none cursor-pointer transition-all ${
+                i === page ? "bg-primary scale-110" : "bg-muted-foreground/30"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {expandedIndex !== null && (
+        <ExpandedInsightCard
+          card={insights[expandedIndex]}
+          onClose={() => setExpandedIndex(null)}
+        />
+      )}
     </div>
   );
 };

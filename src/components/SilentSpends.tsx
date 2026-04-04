@@ -1,27 +1,93 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { type Transaction, formatCurrency } from "@/lib/expenses";
+import { BellOff, CheckCircle, XCircle, CalendarClock, RotateCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { format, addDays, formatDistanceToNow } from "date-fns";
 
 interface SilentSpendsProps {
   transactions: Transaction[];
+  onRefresh: () => void;
 }
 
-const SilentSpends = ({ transactions }: SilentSpendsProps) => {
-  const silentTxns = useMemo(() => {
-    return transactions.filter((t) => t.transaction_type === "Subscription/Autopay");
-  }, [transactions]);
+interface GroupedSub {
+  platform: string;
+  category: string;
+  total: number;
+  count: number;
+  lastDate: string;
+  expectedNext: string;
+  transactionIds: string[];
+}
 
-  const grouped = useMemo(() => {
-    const map: Record<string, { total: number; count: number; platform: string }> = {};
-    silentTxns.forEach((t) => {
+const SilentSpends = ({ transactions, onRefresh }: SilentSpendsProps) => {
+  const activeSubs = useMemo(() => {
+    const subs = transactions.filter(
+      (t) => t.transaction_type === "Subscription/Autopay" && t.status === "active"
+    );
+    const map: Record<string, GroupedSub> = {};
+    subs.forEach((t) => {
       const key = t.platform || t.category;
-      if (!map[key]) map[key] = { total: 0, count: 0, platform: key };
+      if (!map[key]) {
+        map[key] = {
+          platform: key,
+          category: t.category,
+          total: 0,
+          count: 0,
+          lastDate: t.date,
+          expectedNext: "",
+          transactionIds: [],
+        };
+      }
       map[key].total += t.amount;
       map[key].count += 1;
+      if (t.date > map[key].lastDate) map[key].lastDate = t.date;
+      map[key].transactionIds.push(t.id);
     });
-    return Object.values(map).sort((a, b) => b.total - a.total);
-  }, [silentTxns]);
+    return Object.values(map)
+      .map((g) => ({ ...g, expectedNext: format(addDays(new Date(g.lastDate), 30), "dd MMM yyyy") }))
+      .sort((a, b) => b.total - a.total);
+  }, [transactions]);
 
-  const totalMonthly = silentTxns.reduce((s, t) => s + t.amount, 0);
+  const cancelledSubs = useMemo(() => {
+    const subs = transactions.filter(
+      (t) => t.transaction_type === "Subscription/Autopay" && t.status === "cancelled"
+    );
+    const map: Record<string, { platform: string; total: number; cancelledAt: string }> = {};
+    subs.forEach((t) => {
+      const key = t.platform || t.category;
+      if (!map[key]) {
+        map[key] = { platform: key, total: 0, cancelledAt: t.cancelled_at || t.date };
+      }
+      map[key].total += t.amount;
+      if (t.cancelled_at && t.cancelled_at > map[key].cancelledAt) {
+        map[key].cancelledAt = t.cancelled_at;
+      }
+    });
+    return Object.values(map).sort((a, b) => b.cancelledAt.localeCompare(a.cancelledAt));
+  }, [transactions]);
+
+  const totalMonthly = activeSubs.reduce((s, g) => s + g.total, 0);
+
+  const handleStillActive = useCallback(async (item: GroupedSub) => {
+    const { error } = await supabase
+      .from("transactions")
+      .update({ last_confirmed_at: new Date().toISOString() })
+      .in("id", item.transactionIds);
+    if (error) { toast.error("Failed to confirm"); return; }
+    toast.success(`${item.platform} confirmed as active`);
+    onRefresh();
+  }, [onRefresh]);
+
+  const handleCancelled = useCallback(async (item: GroupedSub) => {
+    const { error } = await supabase
+      .from("transactions")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .in("id", item.transactionIds);
+    if (error) { toast.error("Failed to cancel"); return; }
+    toast.success(`${item.platform} marked as cancelled`);
+    onRefresh();
+  }, [onRefresh]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -34,38 +100,81 @@ const SilentSpends = ({ transactions }: SilentSpendsProps) => {
           {formatCurrency(totalMonthly)}
         </p>
         <p className="text-sm text-muted mt-1 m-0">
-          {grouped.length} subscription{grouped.length !== 1 ? "s" : ""} draining your wallet
+          {activeSubs.length} subscription{activeSubs.length !== 1 ? "s" : ""} draining your wallet
         </p>
       </div>
 
-      {grouped.length === 0 ? (
+      {activeSubs.length === 0 ? (
         <div className="section-card text-center">
-          <p className="text-muted m-0">No subscriptions found. You're clean!</p>
+          <p className="text-muted m-0">No active subscriptions found. You're clean!</p>
         </div>
       ) : (
-        grouped.map((item) => (
+        activeSubs.map((item) => (
           <div
             key={item.platform}
-            className="section-card flex items-center justify-between"
+            className="section-card flex flex-col gap-3"
             style={{ background: "linear-gradient(180deg, hsl(50 100% 97%) 0%, hsl(50 92% 91%) 100%)" }}
           >
-            <div className="flex flex-col gap-0.5">
-              <p className="font-semibold m-0">{item.platform}</p>
-              <p className="text-sm text-muted m-0">
-                {formatCurrency(item.total)} · {item.count} transaction{item.count !== 1 ? "s" : ""}
-              </p>
-              <p className="text-xs text-amber-700 mt-1 m-0 italic">Still using this?</p>
+            <div className="flex items-start justify-between">
+              <div className="flex flex-col gap-0.5">
+                <p className="font-semibold m-0">{item.platform}</p>
+                <p className="text-xs text-muted-foreground m-0">{item.category}</p>
+                <p className="text-sm font-bold m-0 mt-1">{formatCurrency(item.total)}</p>
+              </div>
+              <BellOff size={18} className="text-amber-600 shrink-0 mt-1" />
             </div>
-            <div className="flex gap-2">
-              <button className="px-3 py-1.5 text-xs rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 cursor-pointer hover:bg-emerald-100 transition-colors">
-                Yes
+
+            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <RotateCcw size={12} /> Recorded {item.count} time{item.count !== 1 ? "s" : ""}
+              </span>
+              <span className="flex items-center gap-1">
+                <CalendarClock size={12} /> Last added: {format(new Date(item.lastDate), "dd MMM yyyy")}
+              </span>
+              <span className="flex items-center gap-1">
+                <CalendarClock size={12} /> Expected next: {item.expectedNext}
+              </span>
+            </div>
+
+            <div className="flex gap-2 mt-1">
+              <button
+                onClick={() => handleStillActive(item)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-border bg-card text-foreground cursor-pointer hover:bg-accent transition-colors"
+              >
+                <CheckCircle size={14} /> Still Active
               </button>
-              <button className="px-3 py-1.5 text-xs rounded-full bg-amber-50 text-amber-800 border border-amber-200 cursor-pointer hover:bg-amber-100 transition-colors">
-                Not Sure
+              <button
+                onClick={() => handleCancelled(item)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs rounded-lg bg-primary text-primary-foreground border-none cursor-pointer hover:bg-primary/90 transition-colors"
+              >
+                <XCircle size={14} /> Cancelled It
               </button>
             </div>
           </div>
         ))
+      )}
+
+      {/* Cancelled subscriptions section */}
+      {cancelledSubs.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-2">Cancelled Subscriptions</h3>
+          {cancelledSubs.map((item) => (
+            <div
+              key={item.platform}
+              className="section-card flex items-center justify-between mb-2 opacity-60"
+            >
+              <div className="flex flex-col gap-0.5">
+                <p className="font-medium m-0 text-sm line-through">{item.platform}</p>
+                <p className="text-xs text-muted-foreground m-0">
+                  {formatCurrency(item.total)} saved
+                </p>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                Cancelled {formatDistanceToNow(new Date(item.cancelledAt), { addSuffix: true })}
+              </span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

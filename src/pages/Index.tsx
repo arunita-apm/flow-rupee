@@ -8,6 +8,7 @@ import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
 import SummarySection from "@/components/SummarySection";
+import SubscriptionBanner from "@/components/SubscriptionBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -39,7 +40,7 @@ const Index = () => {
       .select("*")
       .eq("user_id", user.id)
       .order("date", { ascending: false });
-    setTransactions(data || []);
+    setTransactions((data as Transaction[]) || []);
     setLoading(false);
   }, [user]);
 
@@ -97,9 +98,14 @@ const Index = () => {
 
     switch (activeTab) {
       case "home":
-        return <Dashboard transactions={transactions} budget={budget} />;
+        return (
+          <div className="flex flex-col gap-3">
+            <SubscriptionBanner transactions={transactions} onRefresh={fetchTransactions} />
+            <Dashboard transactions={transactions} budget={budget} />
+          </div>
+        );
       case "silent":
-        return <SilentSpends transactions={transactions} />;
+        return <SilentSpends transactions={transactions} onRefresh={fetchTransactions} />;
       case "insights":
         return <InsightsSection transactions={transactions} />;
       case "expenses":
