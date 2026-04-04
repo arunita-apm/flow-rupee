@@ -44,40 +44,49 @@ export type Database = {
       transactions: {
         Row: {
           amount: number
+          cancelled_at: string | null
           category: string
           created_at: string
           date: string
           id: string
+          last_confirmed_at: string | null
           need_or_want: string | null
           notes: string | null
           payment_method: string | null
           platform: string | null
+          status: string
           transaction_type: string | null
           user_id: string
         }
         Insert: {
           amount: number
+          cancelled_at?: string | null
           category: string
           created_at?: string
           date: string
           id?: string
+          last_confirmed_at?: string | null
           need_or_want?: string | null
           notes?: string | null
           payment_method?: string | null
           platform?: string | null
+          status?: string
           transaction_type?: string | null
           user_id: string
         }
         Update: {
           amount?: number
+          cancelled_at?: string | null
           category?: string
           created_at?: string
           date?: string
           id?: string
+          last_confirmed_at?: string | null
           need_or_want?: string | null
           notes?: string | null
           payment_method?: string | null
           platform?: string | null
+          status?: string
           transaction_type?: string | null
           user_id?: string
         }
