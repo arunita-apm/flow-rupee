@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import {
   categories, platforms, paymentMethods, transactionTypes, needOrWantOptions,
   type Category, type Platform, type PaymentMethod, type TransactionType, type NeedOrWant,
 } from "@/lib/expenses";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 interface AddExpenseFormProps {
   onAdd: (data: {
@@ -30,25 +36,25 @@ function PillToggle<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-  <div className="flex flex-col gap-1.5 text-sm">
-    <span>{label}</span>
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((opt) => (
-        <button
-          key={opt}
-          type="button"
-          onClick={() => onChange(opt)}
-          className={`px-3 py-1.5 rounded-full text-xs border transition-all duration-150 cursor-pointer ${
-            value === opt
-              ? "bg-primary text-primary-foreground border-primary-strong shadow-sm"
-              : "bg-secondary text-secondary-foreground border-border hover:bg-accent"
-          }`}
-        >
-          {opt}
-        </button>
-      ))}
+    <div className="flex flex-col gap-1.5 text-sm">
+      <span>{label}</span>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => onChange(opt)}
+            className={`px-3 py-1.5 rounded-full text-xs border transition-all duration-150 cursor-pointer ${
+              value === opt
+                ? "bg-primary text-primary-foreground border-primary-strong shadow-sm"
+                : "bg-secondary text-secondary-foreground border-border hover:bg-accent"
+            }`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
     </div>
-  </div>
   );
 }
 
@@ -59,7 +65,7 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">("");
   const [transactionType, setTransactionType] = useState<TransactionType | "">("");
   const [needOrWant, setNeedOrWant] = useState<NeedOrWant | "">("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -71,12 +77,24 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
     if (!paymentMethod) { setError("Please select a payment method."); return; }
     if (!transactionType) { setError("Please select a transaction type."); return; }
     if (!needOrWant) { setError("Please select Need or Want."); return; }
+    if (!date) { setError("Please pick a date."); return; }
 
     setLoading(true);
-    const result = await onAdd({ amount, category, platform, payment_method: paymentMethod, transaction_type: transactionType, need_or_want: needOrWant, date, notes });
+    const result = await onAdd({
+      amount,
+      category,
+      platform,
+      payment_method: paymentMethod,
+      transaction_type: transactionType,
+      need_or_want: needOrWant,
+      date: format(date, "yyyy-MM-dd"),
+      notes,
+    });
     setLoading(false);
 
     if (result.error) { setError(result.error); return; }
+
+    toast.success("Expense added!");
     setError("");
     setAmount("");
     setCategory("");
@@ -84,7 +102,7 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
     setPaymentMethod("");
     setTransactionType("");
     setNeedOrWant("");
-    setDate("");
+    setDate(undefined);
     setNotes("");
   };
 
@@ -110,10 +128,32 @@ const AddExpenseForm = ({ onAdd }: AddExpenseFormProps) => {
               {platforms.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
           </label>
-          <label className="flex flex-col gap-1.5 text-sm">
-            Date (required)
-            <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="form-input" />
-          </label>
+          <div className="flex flex-col gap-1.5 text-sm">
+            <span>Date (required)</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal h-10",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">

@@ -1,3 +1,9 @@
+import {
+  Utensils, Plane, ShoppingBag, Home, Lightbulb, Film,
+  Dumbbell, GraduationCap, Sparkles, Gift, MoreHorizontal,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
 export const categories = [
   "Food & Dining", "Travel & Transport", "Shopping",
   "Rent & Housing", "Utilities & Bills", "Entertainment",
@@ -6,18 +12,18 @@ export const categories = [
 ] as const;
 export type Category = (typeof categories)[number];
 
-export const categoryIcons: Record<Category, string> = {
-  "Food & Dining": "🍽️",
-  "Travel & Transport": "✈️",
-  "Shopping": "🛍️",
-  "Rent & Housing": "🏠",
-  "Utilities & Bills": "💡",
-  "Entertainment": "🎬",
-  "Health & Fitness": "💪",
-  "Education": "📚",
-  "Personal Care": "💅",
-  "Gifts & Social": "🎁",
-  "Miscellaneous": "✨",
+export const categoryIcons: Record<Category, LucideIcon> = {
+  "Food & Dining": Utensils,
+  "Travel & Transport": Plane,
+  "Shopping": ShoppingBag,
+  "Rent & Housing": Home,
+  "Utilities & Bills": Lightbulb,
+  "Entertainment": Film,
+  "Health & Fitness": Dumbbell,
+  "Education": GraduationCap,
+  "Personal Care": Sparkles,
+  "Gifts & Social": Gift,
+  "Miscellaneous": MoreHorizontal,
 };
 
 export const platforms = [
@@ -48,6 +54,9 @@ export interface Transaction {
   date: string;
   notes: string | null;
   created_at: string;
+  status: string;
+  cancelled_at: string | null;
+  last_confirmed_at: string | null;
 }
 
 export interface Filters {
