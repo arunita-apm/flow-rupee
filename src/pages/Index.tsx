@@ -35,10 +35,10 @@ const Index = () => {
 
   const fetchTransactions = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("transactions")
+    const { data } = await (supabase
+      .from("transactions") as any)
       .select("*")
-      .eq("id" as any, user.id)
+      .eq("id", user.id)
       .order("date", { ascending: false });
     setTransactions((data as Transaction[]) || []);
     setLoading(false);
@@ -68,7 +68,7 @@ const Index = () => {
     if (!data.date) return { error: "Please pick a date." };
     if (!user) return { error: "Not logged in." };
 
-    const { error } = await supabase.from("transactions").insert({
+    const { error } = await (supabase.from("transactions") as any).insert({
       id: user.id,
       amount: parsedAmount,
       category: data.category,
