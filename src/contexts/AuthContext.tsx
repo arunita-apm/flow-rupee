@@ -30,12 +30,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("users")
-      .select("name, monthly_budget, phone" as any)
-      .eq("id" as any, userId)
+    const { data } = await (supabase
+      .from("users") as any)
+      .select("name, monthly_budget, phone")
+      .eq("id", userId)
       .maybeSingle();
-    setProfile(data as unknown as UserProfile);
+    setProfile(data as UserProfile | null);
   };
 
   const refreshProfile = async () => {
