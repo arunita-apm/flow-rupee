@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 const SettingsSheet = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const [salary, setSalary] = useState(String(profile?.monthly_salary ?? ""));
+  const [salary, setSalary] = useState(String(profile?.monthly_budget ?? ""));
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -29,8 +29,8 @@ const SettingsSheet = () => {
     setLoading(true);
     const { error } = await supabase
       .from("users")
-      .update({ monthly_salary: val })
-      .eq("user_id", user.id);
+      .update({ monthly_budget: val } as any)
+      .eq("id", user.id);
     setLoading(false);
 
     if (error) {
@@ -44,7 +44,7 @@ const SettingsSheet = () => {
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { setOpen(v); if (v) setSalary(String(profile?.monthly_salary ?? "")); }}>
+    <Sheet open={open} onOpenChange={(v) => { setOpen(v); if (v) setSalary(String(profile?.monthly_budget ?? "")); }}>
       <SheetTrigger asChild>
         <button className="p-1.5 rounded-lg hover:bg-accent transition-colors cursor-pointer bg-transparent border-none">
           <Settings size={18} className="text-primary-foreground/80" />

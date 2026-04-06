@@ -29,9 +29,9 @@ const Onboarding = () => {
     const { error: err } = await supabase.from("users").upsert({
       user_id: user.id,
       name: name.trim(),
-      monthly_salary: parsedSalary,
-      phone_number: phone,
-    }, { onConflict: "user_id" });
+      monthly_budget: parsedSalary,
+      phone: phone,
+    } as any, { onConflict: "user_id" });
 
     if (err) {
       setError(err.message);

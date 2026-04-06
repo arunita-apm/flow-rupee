@@ -31,7 +31,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
   const [addDrawerOpen, setAddDrawerOpen] = useState(false);
 
-  const budget = profile?.monthly_salary ?? 0;
+  const budget = profile?.monthly_budget ?? 0;
 
   const fetchTransactions = useCallback(async () => {
     if (!user) return;
