@@ -39,15 +39,10 @@ const Login = () => {
     const formatted = getFormattedPhone();
     setLoading(true);
     try {
-      const { data, error: fnErr } = await supabase.functions.invoke("verify-otp", {
-        body: { phone: formatted, code: otp },
-      });
-      if (fnErr) throw fnErr;
-      if (data?.error) throw new Error(data.error);
-
       const { error: authErr } = await supabase.auth.verifyOtp({
-        token_hash: data.token_hash,
-        type: "magiclink",
+        phone: formatted,
+        token: otp,
+        type: "sms",
       });
       if (authErr) throw authErr;
     } catch (err: any) {
