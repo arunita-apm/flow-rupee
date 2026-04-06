@@ -38,7 +38,7 @@ const Index = () => {
     const { data } = await supabase
       .from("transactions")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("id" as any, user.id)
       .order("date", { ascending: false });
     setTransactions((data as Transaction[]) || []);
     setLoading(false);
@@ -69,7 +69,7 @@ const Index = () => {
     if (!user) return { error: "Not logged in." };
 
     const { error } = await supabase.from("transactions").insert({
-      user_id: user.id,
+      id: user.id,
       amount: parsedAmount,
       category: data.category,
       platform: data.platform,
