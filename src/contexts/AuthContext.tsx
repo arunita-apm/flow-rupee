@@ -4,8 +4,8 @@ import type { User } from "@supabase/supabase-js";
 
 interface UserProfile {
   name: string | null;
-  monthly_salary: number | null;
-  phone_number: string | null;
+  monthly_budget: number | null;
+  phone: string | null;
 }
 
 interface AuthContextType {
@@ -32,8 +32,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("users")
-      .select("name, monthly_salary, phone_number")
-      .eq("user_id", userId)
+      .select("name, monthly_budget, phone")
+      .eq("id", userId)
       .maybeSingle();
     setProfile(data);
   };
