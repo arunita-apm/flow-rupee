@@ -129,7 +129,12 @@ const Index = () => {
       case "silent":
         return <SilentSpends transactions={transactions} onRefresh={fetchTransactions} />;
       case "insights":
-        return <InsightsSection transactions={transactions} />;
+        return (
+          <div className="flex flex-col gap-4">
+            <InvestmentSuggestionCard />
+            <InsightsSection transactions={transactions} />
+          </div>
+        );
       case "expenses":
         return (
           <div className="flex flex-col gap-4">
