@@ -68,7 +68,7 @@ const Index = () => {
     if (!data.date) return { error: "Please pick a date." };
     if (!user) return { error: "Not logged in." };
 
-    const { error } = await (supabase.from("transactions") as any).insert({
+    const { data: inserted, error } = await (supabase.from("transactions") as any).insert({
       id: user.id,
       amount: parsedAmount,
       category: data.category,
@@ -78,9 +78,30 @@ const Index = () => {
       need_or_want: data.need_or_want,
       date: data.date,
       notes: data.notes?.trim() || "",
-    });
+    }).select().single();
 
     if (error) return { error: error.message };
+
+    // Fire-and-forget webhook notification
+    const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+    if (webhookUrl && inserted) {
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: inserted.id,
+          user_id: inserted.user_id,
+          amount: inserted.amount,
+          category: inserted.category,
+          platform: inserted.platform,
+          transaction_type: inserted.transaction_type,
+          need_or_want: inserted.need_or_want,
+          date: inserted.date,
+          notes: inserted.notes,
+        }),
+      }).catch(() => {});
+    }
+
     await fetchTransactions();
     setAddDrawerOpen(false);
     return { error: null };
