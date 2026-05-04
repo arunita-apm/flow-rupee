@@ -34,7 +34,7 @@ const InvestmentSuggestionCard = () => {
   const handleDismiss = async () => {
     if (!suggestion) return;
     setHidden(true);
-    await (supabase.from("investment_suggestions") as any)
+    await ((supabase as any).from("investment_suggestions"))
       .update({ is_dismissed: true })
       .eq("id", suggestion.id);
   };
