@@ -19,8 +19,8 @@ const InvestmentSuggestionCard = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await (supabase
-        .from("investment_suggestions") as any)
+      const { data } = await ((supabase as any)
+        .from("investment_suggestions"))
         .select("id, title, message, platform_name, platform_url")
         .eq("user_id", user.id)
         .eq("is_dismissed", false)
