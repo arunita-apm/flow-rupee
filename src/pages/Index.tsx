@@ -4,6 +4,7 @@ import BottomNav from "@/components/BottomNav";
 import Dashboard from "@/components/Dashboard";
 import SilentSpends from "@/components/SilentSpends";
 import InsightsSection from "@/components/InsightsSection";
+import InvestmentSuggestionCard from "@/components/InvestmentSuggestionCard";
 import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
@@ -128,7 +129,12 @@ const Index = () => {
       case "silent":
         return <SilentSpends transactions={transactions} onRefresh={fetchTransactions} />;
       case "insights":
-        return <InsightsSection transactions={transactions} />;
+        return (
+          <div className="flex flex-col gap-4">
+            <InvestmentSuggestionCard />
+            <InsightsSection transactions={transactions} />
+          </div>
+        );
       case "expenses":
         return (
           <div className="flex flex-col gap-4">
