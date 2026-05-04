@@ -4,6 +4,7 @@ import BottomNav from "@/components/BottomNav";
 import Dashboard from "@/components/Dashboard";
 import SilentSpends from "@/components/SilentSpends";
 import InsightsSection from "@/components/InsightsSection";
+import InvestmentSuggestionCard from "@/components/InvestmentSuggestionCard";
 import AddExpenseForm from "@/components/AddExpenseForm";
 import FiltersSection from "@/components/FiltersSection";
 import ExpenseList from "@/components/ExpenseList";
